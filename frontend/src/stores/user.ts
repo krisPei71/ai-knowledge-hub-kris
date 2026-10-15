@@ -25,7 +25,7 @@ export const useUserStore = defineStore("user", () => {
     const fetchUserInfo = async () => {
         if (!token.value) return;
         try {
-            userInfo.value = await getMe();
+            userInfo.value = await getMe();            
         } catch (e) {
             // token 失效，清掉
             logout();

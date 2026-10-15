@@ -37,6 +37,22 @@ export interface TicketQuery{
     page_size?:number
 }
 
+export interface TicketLog{
+    id:number
+    ticket_id:number
+    from_status:string
+    to_status:string
+    operator_id:number
+    operator_username:string
+    remark:string | null
+    created_at:string
+}
+
+export interface TicketStatusUpdate{
+    to_status:string,
+    remark?:string | null
+}
+
 // 创建工单
 export function createTicket(data:TicketCreateRequest){
     return request.post<Ticket>('/tickets',data)
@@ -49,4 +65,12 @@ export function getTicketList(query:TicketQuery){
 
 export function getTicketDetail(id:number){
     return request.get<Ticket>(`/tickets/${id}`)
+}
+
+export function getTicketLogs(id:number){
+    return request.get<TicketLog>(`/tickets/${id}/logs`)
+}
+
+export function updateTicketStatus(id:number,data:TicketStatusUpdate){
+    return request.patch<Ticket>(`/tickets/${id}/status`,data)
 }
