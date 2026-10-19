@@ -3,8 +3,13 @@ from typing import List
 from pydantic import BaseModel,ConfigDict,Field
 
 class TicketCreate(BaseModel):
-    title:str = Field(...,min_length=1,max_length=255)
-    description:str = Field(...,min_length=1)
+    title: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(..., min_length=1)
+    category: str | None = None
+    priority: str | None = None
+    ai_category_raw: str | None = None
+    ai_confidence: float | None = None
+    ai_summary: str | None = None
 
 class TicketOut(BaseModel):
     id:int

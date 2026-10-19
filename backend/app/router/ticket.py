@@ -64,7 +64,11 @@ def create_ticket(
         title=data.title,
         description=data.description,
         status="pending",
-        priority="medium",
+        priority=data.priority or "medium",
+        category=data.category,
+        ai_category_raw=data.ai_category_raw,
+        ai_confidence=data.ai_confidence,
+        ai_summary=data.ai_summary,
         creator_id=current_user.id,
     )
     db.add(ticket)
