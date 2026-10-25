@@ -6,3 +6,6 @@ pydantic-settings
 pyJWT
 bcrypt
 python-multipart
+openai
+python-jose[cryptography]
+passlib[bcrypt]

@@ -1,4 +1,5 @@
 import request from "./request";
+import type { Knowledge } from "./knowledge";
 
 export interface Ticket {
   id: number;
@@ -58,6 +59,9 @@ export interface TicketStatusUpdate {
   remark?: string | null;
 }
 
+export interface TicketToKnowledgeReq{
+  solution?:string | null
+}
 // 创建工单
 export function createTicket(data: TicketCreateRequest) {
   return request.post<Ticket>("/tickets", data);
@@ -78,4 +82,8 @@ export function getTicketLogs(id: number) {
 
 export function updateTicketStatus(id: number, data: TicketStatusUpdate) {
   return request.patch<Ticket>(`/tickets/${id}/status`, data);
+}
+
+export function ticketToKnowledge(id:number,data:TicketToKnowledgeReq){
+  return request.post<Knowledge>(`/tickets/${id}/to-knowledge`,data)
 }

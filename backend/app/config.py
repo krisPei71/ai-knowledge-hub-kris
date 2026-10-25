@@ -17,10 +17,13 @@ class Settings(BaseSettings):
     jwt_algorithm:str = "HS256"
     access_token_expire_minutes:int = 1440
 
-    ai_provider:str="mock"
-    ai_api_key:str=""
+    ai_provider:str="openai"
+    ai_api_key:str="sk-1538ffb903644152981757939c72e5c6"
     ai_base_url:str="https://api.deepseek.com"
-    ai_model:str="deepseek-chat"
+    ai_model:str="deepseek-flash"
+
+    embedding_provider: str = "mock"  # mock / openai
+    embedding_dimension: int = 128    # 向量维度
 
     class Config:
         env_file = Path(__file__).resolve().parent.parent / ".env"

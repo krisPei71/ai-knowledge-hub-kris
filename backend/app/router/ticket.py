@@ -8,6 +8,8 @@ from app.models.user import User
 from app.models.ticket_log import TicketLog
 from app.schemas.tickets import TicketCreate,TicketList,TicketOut,TicketLogOut,TicketStatusUpdate
 from app.services.ticket_service import translation_status
+from app.schemas.ai import KnowledgeFromTicketRequest,KnowledgeOut
+from app.services.ai.knowledge_service import create_knowledge_from_ticket
 
 router = APIRouter(prefix='/api/tickets',tags=['工单'])
 
@@ -158,3 +160,11 @@ def get_ticket_log(
             )
         )
     return result
+
+@router.post("/{ticket_id}/to-knowledge",response_model=KnowledgeOut)
+async def ticket_to_knowledge(ticket_id:int,data:KnowledgeFromTicketRequest,db:Session=Depends(getdb),user:User=Depends(get_current_user)):
+    try:
+        knowledge=await create_knowledge_from_ticket(ticket_id,data.solution,db,user)
+        return knowledge
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=str(e))

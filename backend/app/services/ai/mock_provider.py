@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from app.services.ai.base import AIAnalysisResult,AIProvider
 
 logger=logging.getLogger(__name__)
@@ -62,3 +63,9 @@ class MockAIProvider(AIProvider):
             confidence=confidence,
             summary=summary
         )
+    async def generate_stream(self,prompt:str):
+        reply = f"根据知识库，建议您检查网络。您的问题是：{prompt[:10]}... 请按步骤排查。"
+
+        for char in reply:
+            yield char
+            await asyncio.sleep(0.05)

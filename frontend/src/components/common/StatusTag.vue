@@ -12,7 +12,7 @@ import {computed,defineProps} from 'vue'
 import { STATUS_MAP, PRIORITY_MAP } from '@/utils/constants'
 
 const props = defineProps< {
-    type: 'status' | 'priority'
+    type?: 'status' | 'priority'
     value: string
 }>()
 

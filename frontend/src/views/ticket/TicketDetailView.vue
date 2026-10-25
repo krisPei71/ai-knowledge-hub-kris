@@ -22,6 +22,15 @@
         >
           {{ t.label }}
         </el-button>
+
+        <el-button
+          v-if="ticket?.status === 'resolved' || ticket?.status === 'closed'"
+          type="warning"
+          plain
+          @click="handleToKnowledge"
+        >
+          <el-icon><Collection /></el-icon> 一键沉淀为知识库
+        </el-button>
       </div>
     </el-card>
 
@@ -97,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref,computed } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { formatTime } from "@/utils/format";
 import {
   getTicketDetail,
@@ -110,59 +119,61 @@ import { useUserStore } from "@/stores/user.ts";
 import { useRoute } from "vue-router";
 import TicketTimeline from "./TicketTimeline.vue";
 import StatusTag from "@/components/common/StatusTag.vue";
-import {getAvailableTransition, type Transition} from '@/utils/statusMachine.ts'
-import { ElMessage,ElMessageBox } from "element-plus";
+import {
+  getAvailableTransition,
+  type Transition,
+} from "@/utils/statusMachine.ts";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { ticketToKnowledge } from '@/api/ticket'
+import { Collection } from '@element-plus/icons-vue'
 
-const useStore=useUserStore()
+const useStore = useUserStore();
 const route = useRoute();
 const ticketId = Number(route.params.id);
 const loading = ref(false);
 const ticket = ref<Ticket | null>(null);
 const logs = ref<TicketLog[]>([]);
 
+const availableTransitions = computed(() => {
+  if (!ticket.value) return [];
+  return getAvailableTransition(ticket.value, useStore.userInfo);
+});
 
-const availableTransitions = computed(()=>{
-    if(!ticket.value) return []
-    return getAvailableTransition(ticket.value,useStore.userInfo)
-})
-
-const handleTransition = async(t:Transition)=>{
-  let remark: string | null = null
+const handleTransition = async (t: Transition) => {
+  let remark: string | null = null;
 
   // 需要备注时弹输入框
   if (t.remarkRequired) {
     const result = await ElMessageBox.prompt(
-      '请输入操作备注（必填）',
+      "请输入操作备注（必填）",
       t.label,
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPlaceholder: '说明原因...',
-        inputValidator: (val) => !!val?.trim() || '备注不能为空',
-      },
-    ).catch(() => null)
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        inputPlaceholder: "说明原因...",
+        inputValidator: (val) => !!val?.trim() || "备注不能为空",
+      }
+    ).catch(() => null);
 
-    if (!result) return  // 用户取消
-    remark = result.value
+    if (!result) return; // 用户取消
+    remark = result.value;
   } else {
     // 不需要备注，二次确认
     const confirmed = await ElMessageBox.confirm(
       `确定要执行「${t.label}」吗？`,
-      '确认操作',
-      { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' },
-    ).catch(() => false)
+      "确认操作",
+      { confirmButtonText: "确定", cancelButtonText: "取消", type: "warning" }
+    ).catch(() => false);
 
-    if (!confirmed) return
+    if (!confirmed) return;
   }
 
   try {
-    await updateTicketStatus(ticketId,{to_status:t.to,remark})
-    ElMessage.success("操作成功")
-    await loadData()
-  } catch (error) {
-    
-  }
-}
+    await updateTicketStatus(ticketId, { to_status: t.to, remark });
+    ElMessage.success("操作成功");
+    await loadData();
+  } catch (error) {}
+};
 const loadData = async () => {
   loading.value = true;
   try {
@@ -179,6 +190,28 @@ const loadData = async () => {
 };
 
 onMounted(loadData);
+
+const handleToKnowledge=async ()=>{
+  const result = await ElMessageBox.prompt(
+    '请简述本次问题的解决方案（如果留空，将自动使用解决时填写的备注）',
+    '沉淀为知识库',
+    {
+      confirmButtonText: '确认沉淀',
+      cancelButtonText: '取消',
+      inputType: 'textarea',
+      inputPlaceholder: '例如：清除浏览器缓存后重新登录即可',
+    }
+  ).catch(() => null)
+
+  if (!result) return 
+
+  try {
+    await ticketToKnowledge(ticketId,{solution:result.value})
+    ElMessage.success("沉淀知识库成功")
+  } catch (error) {
+    
+  }
+}
 </script>
 
 <style scoped>

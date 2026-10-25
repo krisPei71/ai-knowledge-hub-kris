@@ -1,6 +1,3 @@
-import type { Ticket } from '@/api/ticket'
-import type { UserInfoResponse } from '@/api/auth'
-
 export interface Transition {
     from: string,
     to: string,
